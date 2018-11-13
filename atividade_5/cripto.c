@@ -1,8 +1,12 @@
+/* Giovana Vieira de Morais	597591 */
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 unsigned long long eea(unsigned long long r0, unsigned long long r1, unsigned long long *inv);
-long long unsigned s_m(long long unsigned x, unsigned long long H, unsigned long long n);
+unsigned long long s_m(unsigned long long x, unsigned long long H, unsigned long long n);
+unsigned long long sieve(unsigned long long N);
 
 /* A única linha da entrada contém três inteiros N, E, e C, onde 15 <= N <= 10^9 
 , 1 <= E < N e 1 <= C < N, de forma que N e E constituem a chave pública do algoritmo 
@@ -11,15 +15,30 @@ void main()
 {
 	unsigned long long r0, r1, gcd, inv;
 	unsigned long long N, E, C, M;
+	unsigned long long p, q, phi_n;
 
 	scanf("%llu %llu %llu", &N, %C, &E);
 	if (N < 15 || E < 1 || C < 1 || C > N) {
 		printf("Erro: entrada inválida\n");
 		return;
 	}
+	
+	// primeiro, procuramos pelos primos p e q
+	p = sieve(N);
+	q = E/p;
+
+	phi_n = (p-1)(q-1);
+
+	// chave secreta
+	d = aee(phi_n, E);
+
+	// decifra a mensagem
+	M = s_m(C, d, n);
+	printf("%d\n", M);
 }
 
-// TODO: tratar caso do retorno negativo
+// TODO: testar os casos de número negativo pq talvez possa dar pau por ser
+// unsigned long long
 unsigned long long eea(unsigned long long r0, unsigned long long r1, unsigned long long *inv)
 {
 	unsigned long long int *s, *t, *q, *r;
@@ -59,6 +78,12 @@ unsigned long long eea(unsigned long long r0, unsigned long long r1, unsigned lo
 
 	gcd = r[i-1];
 	*inv = t[i-1];
+
+	// se o inverso for negativo, soma n
+	do {
+		*inv += n;
+	} while (*inv < 0);
+
 	free(s);
 	free(t);
 	free(q);
@@ -67,7 +92,7 @@ unsigned long long eea(unsigned long long r0, unsigned long long r1, unsigned lo
 	return gcd;
 }
 
-long long unsigned s_m(long long unsigned x, unsigned long long H, unsigned long long n)
+unsigned long long q_m(unsigned long long x, unsigned long long H, unsigned long long n)
 {
 	unsigned long long r;
 	unsigned long long tmp;
@@ -85,3 +110,29 @@ long long unsigned s_m(long long unsigned x, unsigned long long H, unsigned long
 
 	return r;
 }
+
+unsigned long long sieve(unsigned long long N) 
+{
+	unsigned long long *primes;
+	unsigned long long thresh = sqrt(N);
+	unsigned long long P;
+
+	primes = (unsigned long long *) malloc(thresh * sizeof(unsigned long long));
+
+	// inicialização do vetor pra aplicação do crivo de Eratóstenes
+	for (int i = 2; i < thresh; i++) {
+		primes[i] = i;
+		j++;
+	}
+
+	for (int i = 2; i < thresh; i++) {
+		
+		if (primes[i] == i) 
+			P = primes[i];
+		// remove os múltiplos de i da lista de primos
+		for (int j = i+i; j < thresh; j += i)
+			primes[j] = 0;
+	}
+
+	return P;
+}	
