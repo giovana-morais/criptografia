@@ -15,9 +15,9 @@ void main()
 {
 	unsigned long long r0, r1, gcd, inv;
 	unsigned long long N, E, C, M;
-	unsigned long long p, q, phi_n;
+	unsigned long long p, q, phi_n, d;
 
-	scanf("%llu %llu %llu", &N, %C, &E);
+	scanf("%llu %llu %llu", &N, &C, &E);
 	if (N < 15 || E < 1 || C < 1 || C > N) {
 		printf("Erro: entrada inválida\n");
 		return;
@@ -27,14 +27,14 @@ void main()
 	p = sieve(N);
 	q = E/p;
 
-	phi_n = (p-1)(q-1);
+	phi_n = (p-1)*(q-1);
 
 	// chave secreta
-	d = aee(phi_n, E);
+	d = eea(phi_n, E, &inv);
 
 	// decifra a mensagem
-	M = s_m(C, d, n);
-	printf("%d\n", M);
+	M = s_m(C, d, N);
+	printf("%llu\n", M);
 }
 
 // TODO: testar os casos de número negativo pq talvez possa dar pau por ser
@@ -81,7 +81,7 @@ unsigned long long eea(unsigned long long r0, unsigned long long r1, unsigned lo
 
 	// se o inverso for negativo, soma n
 	do {
-		*inv += n;
+		*inv += r1;
 	} while (*inv < 0);
 
 	free(s);
@@ -120,13 +120,10 @@ unsigned long long sieve(unsigned long long N)
 	primes = (unsigned long long *) malloc(thresh * sizeof(unsigned long long));
 
 	// inicialização do vetor pra aplicação do crivo de Eratóstenes
-	for (int i = 2; i < thresh; i++) {
+	for (int i = 2; i < thresh; i++) 
 		primes[i] = i;
-		j++;
-	}
 
 	for (int i = 2; i < thresh; i++) {
-		
 		if (primes[i] == i) 
 			P = primes[i];
 		// remove os múltiplos de i da lista de primos
