@@ -3,47 +3,36 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <gmp.h>
+#include "rsa.h" 
 
-unsigned long long eea(unsigned long long r0, unsigned long long r1, signed long long *inv);
-unsigned long long s_m(unsigned long long x, unsigned long long H, unsigned long long n);
-unsigned long long sieve(unsigned long long N);
 
-/* A única linha da entrada contém três inteiros N, E, e C, onde 15 <= N <= 10^9 
-, 1 <= E < N e 1 <= C < N, de forma que N e E constituem a chave pública do algoritmo 
-RSA descrita acima e C é uma mensagem criptografada com essa chave pública. */
-void main() 
+void encript(mpz_t *y, mpz_t x, mpz_t e, mpz_t n)
 {
-	unsigned long long r0, r1, gcd, inv;
-	unsigned long long N, E, C, M;
-	unsigned long long p, q, phi_n, d;
-	long long P;
+	//mpz_powm (mpz_t rop, const mpz_t base, const mpz_t exp, const mpz_t mod)
+	//mpz_t encripted_txt;
+	//mpz_init(encripted_txt);
 
-	scanf("%llu %llu %llu", &N, &E, &C);
-	if (N < 15 || E < 1 || C < 1 || C > N) {
-		printf("Erro: entrada inválida\n");
-		return;
-	}
-	
-	// primeiro, procuramos pelos primos p e q
-	p = sieve(N);
-	p = 13;
-	q = N/p;
-
-	phi_n = (p-1)*(q-1);
-
-	// chave secreta
-	eea(phi_n, E, &inv);
-	// decifra a mensagem
-	M = s_m(C, inv, N);
-	printf("%llu\n", M);
+	mpz_powm(*y, x, e, n);
 }
+
+void decript(mpz_t *x, mpz_t y, mpz_t d, mpz_t n)
+{
+	//mpz_powm (mpz_t rop, const mpz_t base, const mpz_t exp, const mpz_t mod)
+	//mpz_t encripted_txt;
+	//mpz_init(encripted_txt);
+
+	mpz_powm(*x, y, d, n);
+}
+
+
 
 unsigned long long eea(unsigned long long r0, unsigned long long r1, signed long long *inv)
 {
 	signed long long int *t;
 	unsigned long long int *q, *r;
 	unsigned long long int gcd;
-    int i = 1;
+	int i = 1;
 	int tam = 20;
 
 	t = (signed long long *) malloc(tam * sizeof(unsigned long long));
@@ -86,7 +75,6 @@ unsigned long long eea(unsigned long long r0, unsigned long long r1, signed long
 unsigned long long s_m(unsigned long long x, unsigned long long H, unsigned long long n)
 {
 	unsigned long long r;
-	unsigned long long tmp;
 
 	r = 1;
 	while (H > 0){
@@ -120,3 +108,4 @@ unsigned long long sieve(unsigned long long N)
 
 	return P;
 }	
+
