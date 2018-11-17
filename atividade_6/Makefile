@@ -1,8 +1,7 @@
 CC 	= gcc
 CFLAGS 	= -I -Wall
 LDFLAGS	= -lm -lgmp 
-DEPS 	= rsa.h
-OBJ	= main.o rsa.o
+OBJ	= main.o 
 TARGET	= rsa
 
 

@@ -4,9 +4,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gmp.h>
-#include <math.h>
-#include "rsa.h"
 
+
+void encript(mpz_t *y, mpz_t x, mpz_t e, mpz_t n);
+void decript(mpz_t *x, mpz_t y, mpz_t d, mpz_t n);
 
 void main() 
 {
@@ -101,3 +102,12 @@ void main()
 	} while(opt != 0);
 }
 
+void encript(mpz_t *y, mpz_t x, mpz_t e, mpz_t n)
+{
+	mpz_powm(*y, x, e, n);
+}
+
+void decript(mpz_t *x, mpz_t y, mpz_t d, mpz_t n)
+{
+	mpz_powm(*x, y, d, n);
+}
