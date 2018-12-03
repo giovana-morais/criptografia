@@ -11,11 +11,11 @@ typedef struct {
 
 ponto dobro(ponto G, int p, int a);
 ponto soma(ponto G, ponto Q, int p);
-ponto a_d(ponto P, int H, int n);
+ponto a_d(ponto P, int H, int n, int a);
 
 int eea(int r0, int r1);
 int checa_negativo(int num, int mod);
-
+int checa_infinito(ponto P);
 
 void main()
 {
@@ -27,23 +27,23 @@ void main()
 	int n, a, p;
 	ponto G, R;
 
-	// teste
-	G.x = 2;
-	G.y = 10;
 
-	n = 2; a = 3; p = 13;
+	scanf("%d", &n);
+	while (n != 0) {
+		scanf("%d %d %d %d", &a, &p, &G.x, &G.y);
+		R = a_d(G, n, p, a);
+		printf("===================================================\n");
+		printf("n: %d\n", n);
+		printf("R: (%d, %d)\n", R.x, R.y);
+		scanf("%d", &n);
+
+	}
 	
 }
 
 // TODO: tentar fazer sem os vetores
 int eea(int r0, int r1)
 {
-	if (r0 < r1){
-		int aux;
-		aux = r0;
-		r0 = r1;
-		r1 = aux;
-	}
 	int *t;
 	int *q, *r;
 	int gcd;
@@ -72,7 +72,6 @@ int eea(int r0, int r1)
 		i++;
 		r[i]	= r[i-2] % r[i-1];
 		q[i-1]	= (r[i-2]-r[i])/r[i-1];
-		// TODO: prestar atenção nisso aqui
 		t[i]	= t[i-2]-q[i-1]*t[i-1];
 	}
 
@@ -95,23 +94,23 @@ int eea(int r0, int r1)
 }
 
 
-ponto a_d(ponto P, int H, int n)
+ponto a_d(ponto P, int H, int n, int a)
 {
-	int  r;
-	ponto T;
-	T.x = P.x;
-	T.y = P.y;
+	int mask = 1 << sizeof(int)*8-1;
+	int aux = 0;
+	ponto N, Q;
 
+	N = P;
+	Q.x = 0; Q.y = 0;
+	
 	while (H > 0){
-		// dessa forma, pega bit a bit do expoente H
-		if (H % 2 == 1)
-			P = soma(T, P, n);
-			// r = r*x % n;
+		if (H % 2 == 1) 
+			Q = soma(Q, N, n);
+		N = dobro(N, n, a);
 		H >>= 1;
-		T = dobro(T, x, n);
-		//x = x*x % n;
 	}
-	return T;
+
+	return Q;
 }
 
 
@@ -121,20 +120,29 @@ ponto soma(ponto G, ponto Q, int p)
 	int num, denom;
 	ponto R;
 
-	num = (G.y - Q.y) % p;
-	checa_negativo(num, p);
+	// se ambos os pontos são infinitos ou se são inversos
+	if (	(checa_infinito(G) && checa_infinito(Q)) || 
+		(G.x == Q.x && (G.y == ((p-Q.y)%p) || Q.y == ((p-G.y)%p)))) {
+		R.x = 0;
+		R.y = 0;
+	} else if (checa_infinito(Q)) {
+		R.x = G.x;
+		R.y = G.y;
+	} else if (checa_infinito(G)) {
+		R.x = Q.x;
+		R.y = Q.y;
+	} else {
+		num = (G.y - Q.y) % p;
+		num = checa_negativo(num, p);
 
-	tmp = G.x - G.y;
-	tmp = checa_negativo(tmp, p);
-	denom = eea(tmp, p);
-	lambda = (denom * num) % p;
+		denom = eea(p, checa_negativo(G.x - Q.x, p));
+		lambda = (denom * num) % p;
+		R.x = (lambda*lambda % p) + (-Q.x - G.x % p);
+		R.x = checa_negativo(R.x, p);
+		R.y = (lambda * (Q.x - R.x) - Q.y) % p;
+		R.y = checa_negativo(R.y, p);
 
-	R.x = (lambda*lambda - Q.x - G.x) % p;
-	R.x = checa_negativo(R.x, p);
-	R.y = (lambda * (Q.x - R.x) - Q.y) % p;
-	R.y = checa_negativo(R.y, p);
-
-	printf("soma: (%d, %d)\n", R.x, R.y);
+	}
 	return R;
 }
 
@@ -144,18 +152,20 @@ ponto dobro(ponto G, int p, int a)
 	int denom, num;
 	ponto R;
 
-	denom = (3 * (G.x*G.x) + a) % p;
-	denom = checa_negativo(denom, p);
-	num = eea(2*(G.y) % p, p);
+	if (checa_infinito(G)) {
+		R.x = 0;
+		R.y = 0;
+	} else {
+		denom = (3 * (G.x*G.x) + a) % p;
+		num = eea(p, 2*(G.y) % p);
 
-	lambda = (denom * num) % p;
+		lambda = (denom * num) % p;
 
-	R.x = (lambda*lambda - G.x - G.x) % p;
-	R.x = checa_negativo(R.x, p);
-	R.y = (lambda * (G.x - R.x) - G.y) % p;
-	R.y = checa_negativo(R.y, p);
-	printf("dobro: (%d, %d)\n", R.x, R.y);
-
+		R.x = (lambda*lambda - G.x - G.x) % p;
+		R.x = checa_negativo(R.x, p);
+		R.y = (lambda * (G.x - R.x) - G.y) % p;
+		R.y = checa_negativo(R.y, p);
+	}
 	return R;
 }
 
@@ -166,4 +176,11 @@ int checa_negativo(int num, int mod)
 	}
 
 	return num;
+}
+
+int checa_infinito(ponto P) 
+{
+	if (!P.x && !P.y)
+		return 1;
+	return 0;
 }
