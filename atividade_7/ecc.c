@@ -4,11 +4,18 @@
 #include <stdlib.h>
 #include <math.h>
 
-int sieve(unsigned long long N);
-void dobro(int *xg, int *yg, int p);
-void soma(int *xg, int *yg, int xq, int yq, int p);
-int s_m(int x, int H, int n);
+typedef struct {
+	int x;
+	int y;
+} ponto;
+
+ponto dobro(ponto G, int p, int a);
+ponto soma(ponto G, ponto Q, int p);
+ponto a_d(ponto P, int H, int n);
+
 int eea(int r0, int r1);
+int checa_negativo(int num, int mod);
+
 
 void main()
 {
@@ -17,23 +24,32 @@ void main()
 	 * p	: primo
 	 * x e y: coordenadas do ponto G
 	 */
-	int n, a, p, x, y;
+	int n, a, p;
+	ponto G, R;
 
 	// teste
-	n = 3; a = 3; o = 13; x = 2; y = 10;
+	G.x = 2;
+	G.y = 10;
 
-
+	n = 2; a = 3; p = 13;
+	
 }
 
-// TODO: testar os casos em que o resultado de xg - xq é negativo
 // TODO: tentar fazer sem os vetores
 int eea(int r0, int r1)
 {
+	if (r0 < r1){
+		int aux;
+		aux = r0;
+		r0 = r1;
+		r1 = aux;
+	}
 	int *t;
 	int *q, *r;
 	int gcd;
 	int i = 1;
 	int tam = 20;
+	int inv;
 
 	t = (int *) malloc(tam * sizeof(int));
 	q = (int *) malloc(tam * sizeof(int));
@@ -56,6 +72,7 @@ int eea(int r0, int r1)
 		i++;
 		r[i]	= r[i-2] % r[i-1];
 		q[i-1]	= (r[i-2]-r[i])/r[i-1];
+		// TODO: prestar atenção nisso aqui
 		t[i]	= t[i-2]-q[i-1]*t[i-1];
 	}
 
@@ -77,53 +94,76 @@ int eea(int r0, int r1)
 	return inv;
 }
 
-int s_m(int xp, int yp, int H, int n)
+
+ponto a_d(ponto P, int H, int n)
 {
 	int  r;
-	int xt, yt;
-	xt = xp; yt = yp;
+	ponto T;
+	T.x = P.x;
+	T.y = P.y;
 
-	r = 1;
 	while (H > 0){
 		// dessa forma, pega bit a bit do expoente H
 		if (H % 2 == 1)
-			soma(&xt, &yt, xp, yp, n);
+			P = soma(T, P, n);
 			// r = r*x % n;
 		H >>= 1;
-		dobro(&xt, &yt, x);
+		T = dobro(T, x, n);
 		//x = x*x % n;
 	}
-	return r;
+	return T;
 }
 
-void soma(int *xg, int *yg, int xq, int yq, int p)
+
+ponto soma(ponto G, ponto Q, int p)
 {
-	int lambda, xr, yr;
+	int lambda, tmp;
 	int num, denom;
+	ponto R;
 
-	num = (*yg - yq) % p;
-	denom = eea(*xg - yg, p);
+	num = (G.y - Q.y) % p;
+	checa_negativo(num, p);
 
+	tmp = G.x - G.y;
+	tmp = checa_negativo(tmp, p);
+	denom = eea(tmp, p);
 	lambda = (denom * num) % p;
 
-	xr = (pow(lambda,2) - xg - xg) % p;
-	yr = (lambda * (xg - xr) - yg) % p;
+	R.x = (lambda*lambda - Q.x - G.x) % p;
+	R.x = checa_negativo(R.x, p);
+	R.y = (lambda * (Q.x - R.x) - Q.y) % p;
+	R.y = checa_negativo(R.y, p);
+
+	printf("soma: (%d, %d)\n", R.x, R.y);
+	return R;
 }
 
-void dobro(int *xg, int *yg, int p)
+ponto dobro(ponto G, int p, int a)
 {
 	int lambda;
-	int xr, yr;
-	int denom, nu,;
+	int denom, num;
+	ponto R;
 
-	denom = (3 * pow(*xg,2) + a) % p;
-	num = eea(2*(*yg), p);
+	denom = (3 * (G.x*G.x) + a) % p;
+	denom = checa_negativo(denom, p);
+	num = eea(2*(G.y) % p, p);
 
 	lambda = (denom * num) % p;
 
-	xr = (pow(lambda,2) - xg - xg) % p;
-	yr = (lambda * (xg - xr) - yg) % p;
+	R.x = (lambda*lambda - G.x - G.x) % p;
+	R.x = checa_negativo(R.x, p);
+	R.y = (lambda * (G.x - R.x) - G.y) % p;
+	R.y = checa_negativo(R.y, p);
+	printf("dobro: (%d, %d)\n", R.x, R.y);
 
-	*xg = xr;
-	*yg = yr;
+	return R;
+}
+
+int checa_negativo(int num, int mod)
+{
+	while (num < 0) {
+		num += mod;
+	}
+
+	return num;
 }
